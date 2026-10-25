@@ -256,7 +256,10 @@ function describedgrid(desc::StoreDescription)
         declared=desc.gridname,
         detail="the store declares no refinement level, and a stored cell axis " *
                "is read at one level; pass `description` to assert it."))
-    return DiscreteGlobalGrids.levelgrid(system, desc.level)
+    # The declared placement is checked and a declared geodetic latitude
+    # applied here, so the axis's geometry is where the store says its cells are.
+    return DiscreteGlobalGrids.levelgrid(
+        DiscreteGlobalGrids.describedsystem(desc, system), desc.level)
 end
 
 # --- the axis length --------------------------------------------------------

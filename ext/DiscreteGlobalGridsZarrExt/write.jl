@@ -773,11 +773,16 @@ function _layername(A)
 end
 
 function _description(sys, lev, enc, layers)
-    name, ref = _gridname(sys)
+    # Placement and latitude are declared from the system, so a reader puts the
+    # cells where this one has them: `AuthalicSystem(IGeo7System())` is stored
+    # as `igeo7` with geodetic latitude.
+    base, orientation, conversion = DGG.storedsystem(sys)
+    name, ref = _gridname(base)
     return StoreDescription(gridname=name, system=ref.system, idscheme=ref.idscheme,
         level=lev, encoding=enc, coordinate=_coordinatename(enc),
         spatial_dimension=SPATIAL_DIMENSION,
-        variables=String[n for (n, _) in layers])
+        variables=String[n for (n, _) in layers],
+        orientation=orientation, geodetic_conversion=conversion)
 end
 
 _coordinatename(::RangesEncoding) = CELL_RANGES_ARRAY

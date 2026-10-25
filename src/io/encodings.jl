@@ -26,7 +26,7 @@ from a store's vocabulary through [`ENCODING_REGISTRY`](@ref).
 """
 module Encodings
 
-import ..DiscreteGlobalGrids: AbstractGrid, AbstractCellIndex,
+import ..DiscreteGlobalGrids: AbstractGrid, AbstractCellIndex, AuthalicGrid,
     HierarchicalLevelGrid, IGeo7System, HEALPixSystem, Z7Cell, LevelIndex,
     ncells, cellindex, level, rawid
 # The Z7 digit tables, validity predicate and inverse-rank walk are the system's
@@ -308,6 +308,19 @@ idvalid(grid::_HPXGrid, id::Integer) = 0 <= id < ncells(grid)
 # No `idlevel`: the default `nothing` is the correct answer here and not a gap.
 # Every level-L nested id is also a well-formed level-(L+1) id, so an id names
 # no level of its own and a reader cannot be told one.
+
+# --- the authalic wrapper: ids are not geometry ------------------------------
+#
+# `AuthalicGrid` reads a grid's geometry at geodetic latitude and leaves every
+# id where it is, so its id arithmetic is the arithmetic of the grid it wraps.
+# This lets a store that declares geodetic cells use the same layouts.
+
+idtype(grid::AuthalicGrid) = idtype(parent(grid))
+idcell(grid::AuthalicGrid, id::Integer) = idcell(parent(grid), id)
+idrank(grid::AuthalicGrid, id::Integer) = idrank(parent(grid), id)
+idselect(grid::AuthalicGrid, r::Integer) = idselect(parent(grid), r)
+idvalid(grid::AuthalicGrid, id::Integer) = idvalid(parent(grid), id)
+idlevel(grid::AuthalicGrid, id::Integer) = idlevel(parent(grid), id)
 
 # ===========================================================================
 # The encoding side
