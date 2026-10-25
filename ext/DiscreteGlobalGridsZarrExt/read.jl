@@ -327,7 +327,8 @@ function storedaxis(enc::RangesEncoding, grid, group, snap, desc, n, validate, s
     # Kilobytes even for a store of tens of millions of cells, and the axis is
     # arithmetic over it from there: `(n, 2)` as Zarr declares it, which is
     # `(2, n)` in Julia's own order.
-    return cellaxis(enc, grid, permutedims(Array(z)); declared_length=n)
+    return cellaxis(enc, grid, permutedims(Array(z)); declared_length=n,
+        ranges_count=desc.ranges_count)
 end
 
 storedaxis(enc::ImplicitEncoding, grid, group, snap, desc, n, validate, samples) =

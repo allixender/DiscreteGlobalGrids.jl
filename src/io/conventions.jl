@@ -264,6 +264,18 @@ function _asbool(x, key, store, convs)
         detail="`$key` must be a boolean."))
 end
 
+# How a ranges store counts its intervals (`Encodings.RANGES_COUNTS`).
+_ranges_count(::Nothing, store, convs) = nothing
+
+function _ranges_count(x, store, convs)
+    v = _asstring(x, "ranges_count", store, convs)
+    c = Symbol(lowercase(strip(v)))
+    c in RANGES_COUNTS && return c
+    throw(DGGSFormatError(check=:unknown_ranges_count, store=store,
+        conventions=convs, declared=v,
+        detail="`ranges_count` is one of " * join(String.(RANGES_COUNTS), ", ") * "."))
+end
+
 """
     encoding_for(vocabulary; store = "", conventions = String[])
 
@@ -462,6 +474,8 @@ function decode(c::ZarrDGGSConvention, s::StoreSnapshot, ::Detection)
         rotation_pattern=_asstring(get(dggs, "rotation_pattern", nothing),
             "rotation_pattern", store, convs))
 
+    ranges_count = _ranges_count(get(dggs, "ranges_count", nothing), store, convs)
+
     return StoreDescription(gridname=canonical, system=ref.system, idscheme=scheme,
         level=level, encoding=encoding, coordinate=coordinate,
         spatial_dimension=spatial,
@@ -469,6 +483,7 @@ function decode(c::ZarrDGGSConvention, s::StoreSnapshot, ::Detection)
                   arrays_on(s, spatial; exclude=(coordinate,)),
         ellipsoid=parse_ellipsoid(get(dggs, "ellipsoid", nothing); store, conventions=convs),
         orientation=_orientation_or_nothing(orientation),
+        ranges_count=ranges_count,
         provenance=Dict{String,Any}(conventionname(c) => deepcopy(dggs)))
 end
 
@@ -992,6 +1007,8 @@ function encode!(c::ZarrDGGSConvention, s::StoreSnapshot, d::StoreDescription)
     d.gridname == "healpix" && d.idscheme !== nothing &&
         (dggs["indexing_scheme"] = String(d.idscheme))
     d.ellipsoid === nothing || (dggs["ellipsoid"] = ellipsoid_attrs(d.ellipsoid))
+
+    d.ranges_count === nothing || (dggs["ranges_count"] = String(d.ranges_count))
 
     if d.orientation !== nothing
         o = d.orientation
