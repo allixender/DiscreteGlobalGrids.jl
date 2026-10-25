@@ -46,4 +46,6 @@ export IGeo7System,
     z7_hex,
     z7_string
 
+public IGEO7_VERT0_LON, IGEO7_ORIENTATION
+
 end # module IGeo7
